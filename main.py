@@ -67,6 +67,27 @@ def handle_unwatch_channel(ack, body, respond):
         respond("You are not the owner", response_type="ephemeral")
 
 
+@app.command("/list-watched-channels")
+def handle_list_watched_channels(ack, body, respond):
+    ack()
+    user_id = body["user_id"]
+    if user_id == owner_id:
+        bot_db = sql("bot-banner.db")
+        channels = bot_db["channels"]
+        bot_db.close()
+        channelString = ""
+        for channel_id in channels:
+            channelString = f"{channelString}\n - <#{channel_id}> ({channel_id})"
+        if channelString == "":
+            channelString = "No watched channels"
+        respond(
+            f"Watched channels: {channelString}",
+            response_type="ephemeral",
+        )
+    else:
+        respond("You are not the owner", response_type="ephemeral")
+
+
 @app.command("/ban-bot")
 def handle_ban_bot(ack, body, respond):
     ack()
@@ -107,6 +128,46 @@ def handle_unban_bot(ack, body, respond):
         else:
             respond(f"<@{bot_id}> ({bot_id}) was not banned", response_type="ephemeral")
         bot_db.close()
+    else:
+        respond("You are not the owner", response_type="ephemeral")
+
+
+@app.command("/list-banned-bots")
+def handle_list_banned_bots(ack, body, respond):
+    ack()
+    user_id = body["user_id"]
+    if user_id == owner_id:
+        bot_db = sql("bot-banner.db")
+        bots = bot_db["bots"]
+        bot_db.close()
+        botString = ""
+        for bot_id in bots:
+            botString = f"{botString}\n - <@{bot_id}> ({bot_id})"
+        if botString == "":
+            botString = "No banned bots"
+        respond(
+            f"Banned bots: {botString}",
+            response_type="ephemeral",
+        )
+    else:
+        respond("You are not the owner", response_type="ephemeral")
+
+@app.command("/list-channel-members")
+def handle_list_channel_members(ack, body, respond):
+    ack()
+    user_id = body["user_id"]
+    if user_id == owner_id:
+        channel = body["channel_id"]
+        members = client.conversations_members(channel=channel).get("members")
+        memberString = ""
+        for member_id in members:
+            memberString = f"{memberString}\n - <@{member_id}> ({member_id})"
+        if memberString == "":
+            memberString = "No channel members... what the fuck?"
+        respond(
+            f"Channel Members: {memberString}",
+            response_type="ephemeral",
+        )
     else:
         respond("You are not the owner", response_type="ephemeral")
 
